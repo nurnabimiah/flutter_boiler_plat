@@ -8,16 +8,30 @@ import 'package:flutter_basic/providers/theme_provider/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 class MyDrawer extends StatelessWidget {
+  const MyDrawer({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Drawer(
+
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
 
-          const DrawerHeader(
-            decoration:BoxDecoration(color: Colors.blue),
-            child: Text('Settings', style: TextStyle(color: Colors.white, fontSize: 24)),
+          Consumer<ThemeProvider>(
+            builder: (context, themeProvider, child) {
+              return DrawerHeader(
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode
+                      ? Theme.of(context).cardColor
+                      : Theme.of(context).primaryColor,
+                ),
+                child: const Text(
+                  'Settings',
+                  style: TextStyle(color: Colors.white, fontSize: 24),
+                ),
+              );
+            },
           ),
 
           // Theme Switch
