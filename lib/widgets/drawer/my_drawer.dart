@@ -1,17 +1,37 @@
 
-
-
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_basic/providers/localization_provider/localization_provider.dart';
 import 'package:flutter_basic/providers/theme_provider/theme_provider.dart';
 import 'package:provider/provider.dart';
+
+
+String? getTranslated(String? key, BuildContext context) {
+  return Provider.of<LocalizationProvider>(context, listen: false).translate(key!);
+}
+
+
 
 class MyDrawer extends StatelessWidget {
   const MyDrawer({super.key});
 
+  String _getLanguageName(String languageCode) {
+    switch (languageCode) {
+      case 'en':
+        return 'English';
+      case 'bn':
+        return 'Bengali';
+      case 'hi':
+        return 'Hindi';
+      default:
+        return languageCode; // Return the code if the language is not recognized
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+
+    final localizationProvider = Provider.of<LocalizationProvider>(context);
+
     return Drawer(
 
       child: ListView(
@@ -26,8 +46,9 @@ class MyDrawer extends StatelessWidget {
                       ? Theme.of(context).cardColor
                       : Theme.of(context).primaryColor,
                 ),
-                child: const Text(
-                  'Settings',
+                child:  Text(
+                  // Here you need to provide the correct key
+                  getTranslated('settings', context) ?? 'Settings',
                   style: TextStyle(color: Colors.white, fontSize: 24),
                 ),
               );
@@ -49,26 +70,33 @@ class MyDrawer extends StatelessWidget {
             ),
           ),
 
-          // Localization Dropdown
-          // ListTile(
-          //   title: Text('Language'),
-          //   trailing: Consumer<LocalizationProvider>(
-          //     builder: (context, localizationProvider, child) {
-          //       return DropdownButton<String>(
-          //         value: localizationProvider.locale.languageCode,
-          //         items: [
-          //           DropdownMenuItem(child: Text('English'), value: 'en'),
-          //           DropdownMenuItem(child: Text('Spanish'), value: 'es'),
-          //         ],
-          //         onChanged: (value) {
-          //           if (value != null) {
-          //             localizationProvider.changeLocale(value);
-          //           }
-          //         },
-          //       );
-          //     },
-          //   ),
-          // ),
+          // Language Selection
+          ListTile(
+            title: const Text('Language'),
+            trailing: Consumer<LocalizationProvider>(
+              builder: (context, localizationProvider, child) {
+
+                return DropdownButton<Locale>(
+                  value: localizationProvider.locale,
+                  items: localizationProvider.supportedLocalesList.map((locale) {
+                    String languageName = _getLanguageName(locale.languageCode);
+                    return DropdownMenuItem(
+                      value: locale,
+                      child: Text(languageName),
+                    );
+                  }).toList(),
+                  onChanged: (Locale? newValue) {
+                    if (newValue != null) {
+                      localizationProvider.changeLocale(
+                        newValue.languageCode,
+                        newValue.countryCode,
+                      );
+                    }
+                  },
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
